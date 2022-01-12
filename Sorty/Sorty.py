@@ -54,10 +54,10 @@ lastLineGap = (ROW_WIDTH-appleWidth*applesOnLastLine)//(applesOnLastLine-1) + ap
 
 ##fonty, mozne texty po dohrani
 pygame.font.init()
-pygameFont = pygame.font.Font('Font/PIXEAB__.ttf', appleHeight//4)
-scoreFont = pygame.font.Font('Font/PIXEAB__.ttf', appleHeight//2)
-menuFont = pygame.font.Font('Font/PIXEAB__.ttf', appleHeight)
-titleFont = pygame.font.Font('Font/PIXEAB__.ttf', appleHeight*2)
+pygameFont = pygame.font.Font('Font/PIXEAB__.TTF', appleHeight//4)
+scoreFont = pygame.font.Font('Font/PIXEAB__.TTF', appleHeight//2)
+menuFont = pygame.font.Font('Font/PIXEAB__.TTF', appleHeight)
+titleFont = pygame.font.Font('Font/PIXEAB__.TTF', appleHeight*2)
 QUOTES = ("Uninstall this game!", 'Try harder!', 'Not bad!', 'Well done!')
 
 ##zvuk
@@ -243,7 +243,7 @@ def menu(playing, menuOn, MinColorGap):
 
 	##hudba
 	pygame.mixer.music.set_volume(0.1)
-	pygame.mixer.music.load('Sound/Menu - Kevin Macleod - Ambler.mp3')
+	pygame.mixer.music.load('Sound/Menu - Kevin MacLeod - Ambler.mp3')
 	pygame.mixer.music.play()
 
 	title = 'S o r t y'
@@ -360,7 +360,7 @@ def menu(playing, menuOn, MinColorGap):
 def game(playing, apple, gameRunning):
 
 	##hudba
-	pygame.mixer.music.load('Sound/Game - Kevin Macleod - Move Forward.mp3')
+	pygame.mixer.music.load('Sound/Game - Kevin MacLeod - Move Forward.mp3')
 	pygame.mixer.music.play()
 
 	##tracker pro skore a celkovy pocet utrizenych jablek
