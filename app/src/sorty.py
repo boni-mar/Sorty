@@ -8,6 +8,10 @@ import os
 import sys
 import configparser
 
+CONFIG_PATH = 'app/config'
+FONT_PATH = 'app/font'
+IMG_PATH = 'app/img'
+SOUND_PATH = 'app/sound'
 #DISPLAY
 pygame.display.init()
 SCREEN_SIZE = pygame.display.list_modes()[0]
@@ -40,7 +44,7 @@ BG_COLOR = (255, 255, 255)
 SORTED_COLOR = (255, 255, 255)
 UNSORTED_COLOR = (255, 0, 0)
 config = configparser.ConfigParser()
-config.read('Config/config.ini')
+config.read(CONFIG_PATH + '/config.ini')
 defaultConfig = config['Default']['Default']
 
 ##rozmisteni pro regulerni a posledni radu
@@ -54,30 +58,30 @@ lastLineGap = (ROW_WIDTH-appleWidth*applesOnLastLine)//(applesOnLastLine-1) + ap
 
 ##fonty, mozne texty po dohrani
 pygame.font.init()
-pygameFont = pygame.font.Font('Font/PIXEAB__.TTF', appleHeight//4)
-scoreFont = pygame.font.Font('Font/PIXEAB__.TTF', appleHeight//2)
-menuFont = pygame.font.Font('Font/PIXEAB__.TTF', appleHeight)
-titleFont = pygame.font.Font('Font/PIXEAB__.TTF', appleHeight*2)
+pygameFont = pygame.font.Font(FONT_PATH + '/PIXEAB__.TTF', appleHeight//4)
+scoreFont = pygame.font.Font(FONT_PATH + '/PIXEAB__.TTF', appleHeight//2)
+menuFont = pygame.font.Font(FONT_PATH + '/PIXEAB__.TTF', appleHeight)
+titleFont = pygame.font.Font(FONT_PATH + '/PIXEAB__.TTF', appleHeight*2)
 QUOTES = ("Uninstall this game!", 'Try harder!', 'Not bad!', 'Well done!')
 
 ##zvuk
 pygame.mixer.pre_init(44100,-16,2, 1024)
 pygame.mixer.init()
 pygame.mixer.music.set_volume(0.1)
-click = pygame.mixer.Sound('Sound/Menu - click.wav')
+click = pygame.mixer.Sound(SOUND_PATH + '/Menu - click.wav')
 click.set_volume(0.2)
-fanfare = pygame.mixer.Sound('Sound/Game - Fanfare.wav')
-correct = pygame. mixer.Sound('Sound/Game - correct.wav')
+fanfare = pygame.mixer.Sound(SOUND_PATH + '/Game - Fanfare.wav')
+correct = pygame. mixer.Sound(SOUND_PATH + '/Game - correct.wav')
 correct.set_volume(0.05)
-wrong = pygame. mixer.Sound('Sound/Game - wrong.wav')
+wrong = pygame. mixer.Sound(SOUND_PATH + '/Game - wrong.wav')
 wrong.set_volume(0.05)
 
 ##prace s obrazky
-apple = Image.open('Images/jablko.png').convert('RGBA')
+apple = Image.open(IMG_PATH + '/jablko.png').convert('RGBA')
 apple = apple.resize(APPLE_SIZE, Image.NEAREST)
-basket = Image.open('Images/kosik.png').convert('RGBA')
+basket = Image.open(IMG_PATH + '/kosik.png').convert('RGBA')
 basket = basket.resize(BASKET_SIZE, Image.NEAREST)
-bg = Image.open('Images/bg.png').convert('RGBA')
+bg = Image.open(IMG_PATH + '/bg.png').convert('RGBA')
 bg = bg.resize(BG_SIZE, Image.NEAREST)
 bg = pygame.image.fromstring(bg.tobytes(), bg.size, bg.mode)
 applePixels = apple.load()
@@ -243,7 +247,7 @@ def menu(playing, menuOn, MinColorGap):
 
 	##hudba
 	pygame.mixer.music.set_volume(0.1)
-	pygame.mixer.music.load('Sound/Menu - Kevin MacLeod - Ambler.mp3')
+	pygame.mixer.music.load(SOUND_PATH + '/Menu - Kevin MacLeod - Ambler.mp3')
 	pygame.mixer.music.play()
 
 	title = 'S o r t y'
@@ -343,7 +347,7 @@ def menu(playing, menuOn, MinColorGap):
 										click.play()
 										MinColorGap = MinColorGap - MinColorGap + setSettings(settings, settingsSelected, config)
 										config.set('Default', 'Default', settings[settingsSelected].strip('<>'))
-										with open('Config/config.ini', 'w') as configFile:
+										with open(CONFIG_PATH + '/config.ini', 'w') as configFile:
 											config.write(configFile)
 
 					##vypni se
@@ -360,7 +364,7 @@ def menu(playing, menuOn, MinColorGap):
 def game(playing, apple, gameRunning):
 
 	##hudba
-	pygame.mixer.music.load('Sound/Game - Kevin MacLeod - Move Forward.mp3')
+	pygame.mixer.music.load(SOUND_PATH + '/Game - Kevin MacLeod - Move Forward.mp3')
 	pygame.mixer.music.play()
 
 	##tracker pro skore a celkovy pocet utrizenych jablek
