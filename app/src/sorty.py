@@ -135,9 +135,10 @@ def change_basket(img, pixels, colour):
 def generate_color(apple, pixels, colorGap):
 	appleWidth = apple.size[0]
 	appleHeight = apple.size[1]
-	x = random.randint(0, 256 - colorGap)
-	y = random.randint(0, 256 - colorGap)
-	z = random.randint(max(x, y)+colorGap, 256)
+	offset = 10
+	x = random.randint(offset, 256 - colorGap)
+	y = random.randint(offset, 256 - colorGap)
+	z = random.randint(max(x, y)+colorGap, min(256, max(x, y)+2*colorGap))
 	listToChoose = [x, y, z]
 	r = random.choice(listToChoose)
 	listToChoose.remove(r)
@@ -161,18 +162,22 @@ def generate_color(apple, pixels, colorGap):
 
 #FUNKCE PRO MENU
 def draw_menu(menu, screen, scWidth, odsazeni, spaceBetweenChoices):
-		for choice in menu:
-			render = menuFont.render(choice, False, (240, 240, 240))
-			screen.blit(render, (scWidth//2 - int(menuFont.size(choice)[0])//2, 
-				odsazeni + (spaceBetweenChoices+int(menuFont.size(choice)[1]))*(menu.index(choice)+1)))
+	positions = {}
+	for choice in menu:
+		render = menuFont.render(choice, False, MENU_COLOR)
+		pos = (scWidth//2 - int(menuFont.size(choice)[0])//2, 
+			   odsazeni + (spaceBetweenChoices+int(menuFont.size(choice)[1]))*(menu.index(choice)+1))
+		screen.blit(render, pos)
+		positions[choice.strip('<>')] = pos
+	return positions
 
 def draw_title(title, screen, scWidth, odsazeni):
-	render = titleFont.render(title, False, (15, 15, 15))
+	render = titleFont.render(title, False, TITLE_COLOR)
 	screen.blit(render, (scWidth//2 - int(titleFont.size(title)[0])//2, 
 			odsazeni))
 
 def draw_controls(text, screen, scHeight, odsazeniy, odsazenix):
-	render = scoreFont.render(text, False, (240, 240, 240))
+	render = scoreFont.render(text, False, MENU_COLOR)
 	screen.blit(render, (odsazenix, scHeight - odsazeniy))
 
 ##zpracovava vybrany text		
@@ -201,6 +206,8 @@ def menu(playing, menuOn, MinColorGap):
 	selected = 0
 	settingsSelected = settings.index(defaultConfig)
 
+	clicked = False
+	settingsOn = False
 	while menuOn:
 
 		##loopuj hudbu
@@ -209,8 +216,8 @@ def menu(playing, menuOn, MinColorGap):
 
 		##kresleni
 		screen.blit(bg, (0, 0))
-		draw_title(title,screen,SCREEN_WIDTH, appleHeight)
-		draw_menu(menu,screen, SCREEN_WIDTH, appleHeight*2, appleHeight)
+		draw_title(title, screen, SCREEN_WIDTH, appleHeight)
+		menu_positions = draw_menu(menu, screen, SCREEN_WIDTH, appleHeight*2, appleHeight)
 		draw_controls(controls, screen, SCREEN_HEIGHT, appleHeight, appleHeight//3)
 
 		pygame.display.update()
@@ -219,6 +226,30 @@ def menu(playing, menuOn, MinColorGap):
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				menuOn = False
+			
+			#! trochu jsem to vycucal z prstu
+			elif not clicked and event.type == pygame.MOUSEBUTTONDOWN:
+				clicked = True
+				click.play()
+				fontSize = menuFont.size('X')
+				for menu_item, position in menu_positions.items():
+					if event.pos[0] >= position[0] \
+						and event.pos[0] <= position[0] + fontSize[0]*len(menu_item) \
+						and event.pos[1] >= position[1] \
+						and event.pos[1] <= position[1] + fontSize[1]:
+						if menu_item == 'Play':
+							playing = True
+							menuOn = False
+							return playing, MinColorGap
+						elif menu_item == 'Difficulty':
+							settingsOn = True
+						elif menu_item == 'Quit':
+							menuOn = False
+							playing = False
+
+			elif event.type == pygame.MOUSEBUTTONUP:
+				clicked = False
+
 			elif event.type == pygame.KEYDOWN:
 				if event.key == pygame.K_ESCAPE:
 					menuOn = False
@@ -254,54 +285,68 @@ def menu(playing, menuOn, MinColorGap):
 						click.play()
 						settingsOn = True
 
-						while settingsOn:
-							screen.blit(bg, (0, 0))
-							draw_title(title,screen,SCREEN_WIDTH, appleHeight)
-							draw_menu(settings,screen, 
-								SCREEN_WIDTH, 
-								appleHeight*2, 
-								appleHeight//2)
-							selection(settings, settingsSelected, settingsSelected)
-							draw_controls(controls, screen, SCREEN_HEIGHT, appleHeight, appleHeight//3)
-							pygame.display.update()
-
-							for event in pygame.event.get():
-								if event.type == pygame.QUIT:
-									settingsOn = False
-								elif event.type == pygame.KEYDOWN:
-									if event.key == pygame.K_ESCAPE:
-										settingsOn = False
-									elif event.key == pygame.K_DOWN:
-										click.play()
-										if settingsSelected == len(settings)-1:
-											selection(settings, settingsSelected, 0)
-											settingsSelected = 0
-										else:
-											selection(settings, settingsSelected, settingsSelected+1)
-											settingsSelected += 1
-									elif event.key == pygame.K_UP:
-										click.play()
-										if settingsSelected == 0:
-											selection(settings, settingsSelected, len(settings)-1)
-											settingsSelected = len(settings)-1
-										else:
-											selection(settings, settingsSelected, settingsSelected-1)
-											settingsSelected -= 1
-									elif event.key == pygame.K_RETURN:
-										click.play()
-										MinColorGap = MinColorGap - MinColorGap + setSettings(settings, settingsSelected, config)
-										config.set('Default', 'Default', settings[settingsSelected].strip('<>'))
-										with open(CONFIG_PATH + '/config.ini', 'w') as configFile:
-											config.write(configFile)
-
 					##vypni se
 					elif menu[selected] == '<Quit>':
 						click.play()
-						return False, None
+						menuOn = False
 
 					##neco se nam pokazilo
 					else:
 						print('something wrong.')
+		while settingsOn:
+			screen.blit(bg, (0, 0))
+			draw_title(title,screen,SCREEN_WIDTH, appleHeight)
+			menu_positions = draw_menu(settings,screen, 
+				SCREEN_WIDTH, 
+				appleHeight*2, 
+				appleHeight//2)
+			selection(settings, settingsSelected, settingsSelected)
+			draw_controls(controls, screen, SCREEN_HEIGHT, appleHeight, appleHeight//3)
+			pygame.display.update()
+
+			for event in pygame.event.get():
+				if event.type == pygame.QUIT:
+					settingsOn = False
+				elif not clicked and event.type == pygame.MOUSEBUTTONDOWN:
+					clicked = True
+					click.play()
+					fontSize = menuFont.size('X')
+					for i, (menu_item, position) in enumerate(menu_positions.items()):
+						if event.pos[0] >= position[0] \
+							and event.pos[0] <= position[0] + fontSize[0]*len(menu_item) \
+							and event.pos[1] >= position[1] \
+							and event.pos[1] <= position[1] + fontSize[1]:
+
+							selection(settings, settingsSelected, i)
+							settingsSelected = i
+				elif event.type == pygame.MOUSEBUTTONUP:
+					clicked = False
+				elif event.type == pygame.KEYDOWN:
+					if event.key == pygame.K_ESCAPE:
+						menuOn = True
+						settingsOn = False
+					elif event.key == pygame.K_DOWN:
+						click.play()
+						if settingsSelected == len(settings)-1:
+							selection(settings, settingsSelected, 0)
+							settingsSelected = 0
+						else:
+							selection(settings, settingsSelected, settingsSelected+1)
+							settingsSelected += 1
+					elif event.key == pygame.K_UP:
+						click.play()
+						if settingsSelected == 0:
+							selection(settings, settingsSelected, len(settings)-1)
+							settingsSelected = len(settings)-1
+						else:
+							selection(settings, settingsSelected, settingsSelected-1)
+							settingsSelected -= 1
+					elif event.key == pygame.K_RETURN:
+						click.play()
+						MinColorGap = setSettings(settings, settingsSelected, config)
+						config.set('Default', 'Default', settings[settingsSelected].strip('<>'))
+						with open(CONFIG_PATH + '/config.ini', 'w') as configFile:
+							config.write(configFile)
 	return False, MinColorGap
 
 #HLAVNI HERNI FUNKCE
@@ -350,7 +395,6 @@ def game(playing, apple, gameRunning):
 
 		##nechavame uzrat jablka
 		i = 0
-		j = 0
 		apples = []
 		odsazeni = int((SCREEN_WIDTH - ROW_WIDTH)//2)
 		for r in range(1, rowsOfApples+1):

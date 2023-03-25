@@ -8,6 +8,8 @@ DEFAULT_FONT = FONT_PATH + '/PIXEAB__.TTF'
 BG_COLOR = (255, 255, 255)
 SORTED_COLOR = (255, 255, 255)
 UNSORTED_COLOR = (255, 0, 0)
+TITLE_COLOR = (15, 15, 15)
+MENU_COLOR = (240, 240, 240)
 # game settings
 APPLE_COUNT = 20
 QUOTES = ("Uninstall this game!", 'Try harder!', 'Not bad!', 'Well done!')

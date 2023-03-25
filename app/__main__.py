@@ -1,1 +1,1 @@
-from src.sorty import *
+import src
