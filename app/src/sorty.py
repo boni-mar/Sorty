@@ -155,9 +155,7 @@ def generate_color(apple, pixels, colorGap):
 			elif pixels[i, j] == shade_color:
 				pixels[i, j] = (r//2, g//2, b//2, 255)
 
-	
 	data = apple.tobytes()
-
 	return data, (r,g,b)
 
 #FUNKCE PRO MENU
@@ -191,13 +189,14 @@ def setSettings(settings, settingSelected, config):
 	return newGap
 
 #HLAVNI FUNKCE MENU
-def menu(playing, menuOn, MinColorGap):
+def menu():
 
 	##hudba
 	pygame.mixer.music.set_volume(0.1)
 	pygame.mixer.music.load(SOUND_PATH + '/Menu - Kevin MacLeod - Ambler.mp3')
 	pygame.mixer.music.play()
 
+	defaultConfig = config['Default']['default']
 	title = 'S o r t y'
 	menu = ['<Play>', 'Difficulty', 'Quit']
 	controls = 'Controls : Arrow Keys, Enter, Esc'
@@ -205,9 +204,14 @@ def menu(playing, menuOn, MinColorGap):
 	settings.remove('Default')
 	selected = 0
 	settingsSelected = settings.index(defaultConfig)
-
-	clicked = False
+	# menu states
+	menuOn = True
 	settingsOn = False
+	# output varialbe: True = play the game, False = quit
+	play = False
+	# variable for getting only one click at a time 
+	clicked = False
+
 	while menuOn:
 
 		##loopuj hudbu
@@ -238,14 +242,13 @@ def menu(playing, menuOn, MinColorGap):
 						and event.pos[1] >= position[1] \
 						and event.pos[1] <= position[1] + fontSize[1]:
 						if menu_item == 'Play':
-							playing = True
+							play = True
 							menuOn = False
-							return playing, MinColorGap
 						elif menu_item == 'Difficulty':
 							settingsOn = True
 						elif menu_item == 'Quit':
 							menuOn = False
-							playing = False
+							play = False
 
 			elif event.type == pygame.MOUSEBUTTONUP:
 				clicked = False
@@ -276,9 +279,8 @@ def menu(playing, menuOn, MinColorGap):
 					#zacni hru
 					if menu[selected] == '<Play>':
 						click.play()
-						playing = True
+						play = True
 						menuOn = False
-						return playing, MinColorGap
 
 					#zapni nastaveni
 					elif  menu[selected] == '<Difficulty>':
@@ -319,6 +321,9 @@ def menu(playing, menuOn, MinColorGap):
 
 							selection(settings, settingsSelected, i)
 							settingsSelected = i
+					config.set('Default', 'Default', settings[settingsSelected].strip('<>'))
+					with open(CONFIG_PATH + '/config.ini', 'w') as configFile:
+						config.write(configFile)
 				elif event.type == pygame.MOUSEBUTTONUP:
 					clicked = False
 				elif event.type == pygame.KEYDOWN:
@@ -343,15 +348,14 @@ def menu(playing, menuOn, MinColorGap):
 							settingsSelected -= 1
 					elif event.key == pygame.K_RETURN:
 						click.play()
-						MinColorGap = setSettings(settings, settingsSelected, config)
 						config.set('Default', 'Default', settings[settingsSelected].strip('<>'))
 						with open(CONFIG_PATH + '/config.ini', 'w') as configFile:
 							config.write(configFile)
-	return False, MinColorGap
+	return play
 
 #HLAVNI HERNI FUNKCE
-def game(playing, apple, gameRunning):
-
+def game(playing, apple):
+	gameRunning = True
 	##hudba
 	pygame.mixer.music.load(SOUND_PATH + '/Game - Kevin MacLeod - Move Forward.mp3')
 	pygame.mixer.music.play()
@@ -361,22 +365,19 @@ def game(playing, apple, gameRunning):
 	applesOut = 0
 	while playing:
 
-		##upletani kosiku
+		##upleteni kosiku
 		basket_array = np.array(basket)
-		green_hue = (180-70)/360
-		red_hue = (180-180)/360
-		blue_hue = (180+10)/360
 		##cerveny
 		red_basket = Image.fromarray(
-			shift_hue(basket_array,red_hue), 'RGBA')
+			shift_hue(basket_array,RED_BASKET_HUE), 'RGBA')
 		red_data = red_basket.tobytes()
 		##zeleny
 		green_basket = Image.fromarray(
-			shift_hue(basket_array,green_hue), 'RGBA')
+			shift_hue(basket_array,GREEN_BASKET_HUE), 'RGBA')
 		green_data = green_basket.tobytes()
 		##modry
 		blue_basket = Image.fromarray(
-			shift_hue(basket_array,blue_hue), 'RGBA')
+			shift_hue(basket_array,BLUE_BASKET_HUE), 'RGBA')
 		blue_data = blue_basket.tobytes()
 
 		##data pro editovani obrazku
@@ -394,6 +395,7 @@ def game(playing, apple, gameRunning):
 			blue_data, basketSize, basketMode)
 
 		##nechavame uzrat jablka
+		MIN_COLOR_GAP = int(config[config['Default']['Default']]['minimalcolorgap'])
 		i = 0
 		apples = []
 		odsazeni = int((SCREEN_WIDTH - ROW_WIDTH)//2)
@@ -412,9 +414,6 @@ def game(playing, apple, gameRunning):
 					y = UPPER_BORDER + appleHeight*(r-1)*1.5
 					generatedApple = Apple(x, y, data, rgb, appleSize)
 					apples.append(generatedApple)
-
-		##nevyuzita promenna pro pripadny load pouzitych jablek
-		applesSaveable = apples
 
 		##umisteni kosiku
 		spaceBetweenBaskets = int((- odsazeni*2 + SCREEN_WIDTH - 3*basketWidth)//2)
@@ -585,11 +584,8 @@ def game(playing, apple, gameRunning):
 #HLAVNI LOOP
 gameRunning = True
 while gameRunning:
-
-	playing = False
-	menuOn = True
-	playing, MIN_COLOR_GAP = menu(playing, menuOn, MIN_COLOR_GAP)
-	gameRunning = game(playing, apple, gameRunning)
+	playing = menu()
+	gameRunning = game(playing, apple)
 
 ##CREDITS
 print('Beneš entertainment 2020, all rights reserved')
