@@ -310,6 +310,7 @@ def menu(playing, menuOn, MinColorGap):
 								SCREEN_WIDTH, 
 								appleHeight*2, 
 								appleHeight//2)
+							selection(settings, settingsSelected, settingsSelected)
 							draw_controls(controls, screen, SCREEN_HEIGHT, appleHeight, appleHeight//3)
 							pygame.display.update()
 
