@@ -199,7 +199,7 @@ def menu():
 	defaultConfig = config['Default']['default']
 	title = 'S o r t y'
 	menu = ['<Play>', 'Difficulty', 'Quit']
-	controls = 'Controls : Arrow Keys, Enter, Esc'
+	controls = 'Controls : Mouse, Arrow Keys, Enter, Esc'
 	settings = config.sections()
 	settings.remove('Default')
 	selected = 0
