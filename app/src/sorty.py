@@ -581,11 +581,12 @@ def game(playing, apple):
 						gameRunning = True
 						return gameRunning
 
-#HLAVNI LOOP
-gameRunning = True
-while gameRunning:
-	playing = menu()
-	gameRunning = game(playing, apple)
+def main():
+	# main loop
+    gameRunning = True
+    while gameRunning:
+        playing = menu()
+        gameRunning = game(playing, apple)
 
-##CREDITS
-print('Beneš entertainment 2020, all rights reserved')
+    # credits
+    print('Beneš entertainment 2020, all rights reserved')
