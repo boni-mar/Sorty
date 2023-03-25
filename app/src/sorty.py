@@ -1,29 +1,20 @@
-import pygame
-from PIL import Image
-import time
 import random
-import numpy as np
-import pygame.display
 import os
 import sys
+import numpy as np
+import pygame
+import pygame.display
+from PIL import Image
 import configparser
 
-CONFIG_PATH = 'app/config'
-FONT_PATH = 'app/font'
-IMG_PATH = 'app/img'
-SOUND_PATH = 'app/sound'
+from src.constants import *
+
 #DISPLAY
 pygame.display.init()
 SCREEN_SIZE = pygame.display.list_modes()[0]
 SCREEN_WIDTH = SCREEN_SIZE[0]
 SCREEN_HEIGHT = SCREEN_SIZE[1]
-window_posx = int(pygame.display.list_modes()[0][0] //2 - SCREEN_WIDTH//2)
-window_posy = int(pygame.display.list_modes()[0][1] //2 - SCREEN_HEIGHT//2)
-os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (window_posx, window_posy)
-if not (window_posx, window_posy) == (0, 0):
-	screen = pygame.display.set_mode(SCREEN_SIZE)
-else:
-	screen = pygame.display.set_mode(SCREEN_SIZE, pygame.NOFRAME)
+screen = pygame.display.set_mode(SCREEN_SIZE, pygame.NOFRAME)
 
 #VARy PRO HRU
 ##umisteni, velikosti
@@ -38,11 +29,7 @@ APPLE_SIZE = (int(10*RESIZE_SCALE), int(10*RESIZE_SCALE))
 appleWidth = APPLE_SIZE[0]
 appleHeight = APPLE_SIZE[1]
 
-##pocet jablek, barvy, pristup k .ini souboru
-APPLE_COUNT = 20
-BG_COLOR = (255, 255, 255)
-SORTED_COLOR = (255, 255, 255)
-UNSORTED_COLOR = (255, 0, 0)
+##load default configuration
 config = configparser.ConfigParser()
 config.read(CONFIG_PATH + '/config.ini')
 defaultConfig = config['Default']['Default']
@@ -58,23 +45,28 @@ lastLineGap = (ROW_WIDTH-appleWidth*applesOnLastLine)//(applesOnLastLine-1) + ap
 
 ##fonty, mozne texty po dohrani
 pygame.font.init()
-pygameFont = pygame.font.Font(FONT_PATH + '/PIXEAB__.TTF', appleHeight//4)
-scoreFont = pygame.font.Font(FONT_PATH + '/PIXEAB__.TTF', appleHeight//2)
-menuFont = pygame.font.Font(FONT_PATH + '/PIXEAB__.TTF', appleHeight)
-titleFont = pygame.font.Font(FONT_PATH + '/PIXEAB__.TTF', appleHeight*2)
-QUOTES = ("Uninstall this game!", 'Try harder!', 'Not bad!', 'Well done!')
+def font(size):
+	return pygame.font.Font(DEFAULT_FONT, size)
+titleFont = font(appleHeight*2)
+menuFont = font(appleHeight)
+scoreFont = font(appleHeight//2)
+pygameFont = font(appleHeight//4)
 
 ##zvuk
 pygame.mixer.pre_init(44100,-16,2, 1024)
 pygame.mixer.init()
 pygame.mixer.music.set_volume(0.1)
+# menu sounds
 click = pygame.mixer.Sound(SOUND_PATH + '/Menu - click.wav')
 click.set_volume(0.2)
-fanfare = pygame.mixer.Sound(SOUND_PATH + '/Game - Fanfare.wav')
+# apple is in the right basket
 correct = pygame. mixer.Sound(SOUND_PATH + '/Game - correct.wav')
 correct.set_volume(0.05)
+# apple is not in the right basket
 wrong = pygame. mixer.Sound(SOUND_PATH + '/Game - wrong.wav')
 wrong.set_volume(0.05)
+# when you get everything right
+fanfare = pygame.mixer.Sound(SOUND_PATH + '/Game - Fanfare.wav')
 
 ##prace s obrazky
 apple = Image.open(IMG_PATH + '/jablko.png').convert('RGBA')
